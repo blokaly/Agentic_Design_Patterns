@@ -4,6 +4,15 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnablePassthrough, RunnableBranch, RunnableLambda } from "@langchain/core/runnables";
 import { config } from "./config.js";
 import {BaseChatModel} from "@langchain/core/language_models/chat_models";
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+
+// Load and parse the YAML file
+const prompts_data: any = yaml.load(fs.readFileSync('src/prompts/ch02_routing_prompts.yaml', 'utf8'));
+
+// Create the prompt from the loaded data
+const coordinator_router_prompt_messages = prompts_data.coordinator_router_prompt.map((msg: { type: string, content: string }) => [msg.type, msg.content]);
+const coordinator_router_prompt = ChatPromptTemplate.fromMessages(coordinator_router_prompt_messages);
 
 // --- Define Simulated Sub-Agent Handlers (equivalent to ADK sub_agents) ---
 
@@ -21,17 +30,6 @@ const unclear_handler = (request: string): string => {
     console.log("\n--- HANDLING UNCLEAR REQUEST ---");
     return `Coordinator could not delegate request: '${request}'. Please clarify.`;
 }
-
-// --- Define Coordinator Router Chain (equivalent to ADK coordinator's instruction) ---
-// This chain decides which handler to delegate to.
-const coordinator_router_prompt = ChatPromptTemplate.fromMessages([
-    ["system", `Analyze the user's request and determine which specialist handler should process it.
-     - If the request is related to booking flights or hotels, output 'booker'.
-     - For all other general information questions, output 'info'.
-     - If the request is unclear or doesn't fit either category, output 'unclear'.
-     ONLY output one word: 'booker', 'info', or 'unclear'.`],
-    ["user", "{request}"]
-]);
 
 // --- Example Usage ---
 const main = async () => {

@@ -1,0 +1,10 @@
+coordinator_router_prompt:
+  - type: system
+    content: |
+      Analyze the user's request and determine which specialist handler should process it.
+      - If the request is related to booking flights or hotels, output 'booker'.
+      - For all other general information questions, output 'info'.
+      - If the request is unclear or doesn't fit either category, output 'unclear'.
+      ONLY output one word: 'booker', 'info', or 'unclear'.
+  - type: user
+    content: "{request}"
