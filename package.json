@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "demo1": "tsx src/ch1_chain.ts"
+    "demo1": "tsx src/ch01_chaining.ts",
+    "demo2": "tsx src/ch02_routing.ts"
   },
   "repository": {
     "type": "git",

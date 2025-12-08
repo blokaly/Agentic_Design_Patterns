@@ -13,7 +13,7 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "allowJs": true,
-    "allowImportingTsExtensions": true,
+
     "preserveConstEnums": true,
     "paths": {
       "openai": ["./node_modules/openai/index.d.ts"],
