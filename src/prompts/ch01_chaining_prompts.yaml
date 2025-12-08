@@ -1,0 +1,7 @@
+promptExtract:
+  template: "Extract the technical specifications from the following text:
+{text_input}"
+
+promptTransform:
+  template: "Transform the following specifications into a JSON object with 'cpu', 'memory', and 'storage' as keys:
+{specifications}"

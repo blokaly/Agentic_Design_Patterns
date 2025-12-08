@@ -5,21 +5,22 @@ import {ChatOpenAI} from "@langchain/openai";
 import {FakeListChatModel} from "@langchain/core/utils/testing";
 import {config} from "./config.js";
 import {BaseChatModel} from "@langchain/core/language_models/chat_models";
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+
+// Load and parse the YAML file
+const prompts_data: any = yaml.load(fs.readFileSync('src/prompts/ch01_chaining_prompts.yaml', 'utf8'));
+
+// --- Prompt 1: Extract Information ---
+const promptExtract = ChatPromptTemplate.fromTemplate(prompts_data.promptExtract.template);
+
+// --- Prompt 2: Transform to JSON ---
+const promptTransform = ChatPromptTemplate.fromTemplate(prompts_data.promptTransform.template);
 
 /**
  * Main function to run the LangChain sequence.
  */
 const runSpecificationChain = async (llm: BaseChatModel) => {
-    // --- Prompt 1: Extract Information ---
-    const promptExtract = ChatPromptTemplate.fromTemplate(
-        "Extract the technical specifications from the following text:\n\n{text_input}"
-    );
-
-    // --- Prompt 2: Transform to JSON ---
-    const promptTransform = ChatPromptTemplate.fromTemplate(
-        "Transform the following specifications into a JSON object with 'cpu', 'memory', and 'storage' as keys:\n\n{specifications}"
-    );
-
     // --- Build the Chain using LCEL ---
 
     // 1. Extraction Chain: Extracts raw specifications from text_input
