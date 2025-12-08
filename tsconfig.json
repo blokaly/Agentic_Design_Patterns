@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "noImplicitAny": false,
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "preserveConstEnums": true,
+    "paths": {
+      "openai": ["./node_modules/openai/index.d.ts"],
+      "*": ["*", "*.js", "./node_modules/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
