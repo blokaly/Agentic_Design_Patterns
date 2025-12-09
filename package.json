@@ -8,7 +8,8 @@
     "build": "tsc",
     "demo1": "tsx src/ch01_chaining.ts",
     "demo2": "tsx src/ch02_routing.ts",
-    "demo3": "tsx src/ch03_parallelization.ts"
+    "demo3": "tsx src/ch03_parallelization.ts",
+    "demo4": "tsx src/ch04_reflection.ts"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
   "dependencies": {
     "@langchain/core": "^1.1.4",
     "@langchain/openai": "^1.1.3",
+    "@langchain/xai": "^1.0.2",
     "@types/js-yaml": "^4.0.9",
     "dotenv": "^17.2.3",
     "js-yaml": "^4.1.1",

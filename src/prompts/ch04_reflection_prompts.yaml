@@ -1,0 +1,18 @@
+taskPrompt: |
+  Your task is to create a Python function named `calculate_factorial`.
+  This function should do the following:
+  1.  Accept a single integer `n` as input.
+  2.  Calculate its factorial (n!).
+  3.  Include a clear docstring explaining what the function does.
+  4.  Handle edge cases: The factorial of 0 is 1.
+  5.  Handle invalid input: Raise a ValueError if the input is a negative number.
+
+refinementPrompt: "Please refine the code using the critiques provided."
+
+reflectorPrompt: |
+  You are a senior software engineer and an expert in Python.
+  Your role is to perform a meticulous code review.
+  Critically evaluate the provided Python code based on the original task requirements.
+  Look for bugs, style issues, missing edge cases, and areas for improvement.
+  If the code is perfect and meets all requirements, respond with the single phrase 'CODE_IS_PERFECT'.
+  Otherwise, provide a bulleted list of your critiques.
