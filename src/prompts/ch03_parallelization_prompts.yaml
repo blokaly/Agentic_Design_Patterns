@@ -1,0 +1,28 @@
+summarizePrompt:
+  - type: system
+    content: "Summarize the following topic concisely:"
+  - type: user
+    content: "{topic}"
+
+questionsPrompt:
+  - type: system
+    content: "Generate three interesting questions about the following topic:"
+  - type: user
+    content: "{topic}"
+
+termsPrompt:
+  - type: system
+    content: "Identify 5-10 key terms from the following topic, separated by commas:"
+  - type: user
+    content: "{topic}"
+
+synthesisPrompt:
+  - type: system
+    content: |
+      Based on the following information:
+      Summary: {summary}
+      Related Questions: {questions}
+      Key Terms: {keyTerms}
+      Synthesize a comprehensive answer.
+  - type: user
+    content: "Original topic: {topic}"

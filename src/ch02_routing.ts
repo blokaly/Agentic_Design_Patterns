@@ -6,27 +6,63 @@ import { config } from "./config.js";
 import {BaseChatModel} from "@langchain/core/language_models/chat_models";
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import { z } from 'zod';
+
+// Define Zod schemas
+const messageSchema = z.object({
+    type: z.string(),
+    content: z.string(),
+});
+
+const promptsSchema = z.object({
+    coordinatorRouterPrompt: z.array(messageSchema),
+});
+
+const routerOutputSchema = z.enum(['booker', 'info', 'unclear']);
+
+const lambdaInputSchema = z.object({
+    decision: routerOutputSchema,
+    request: z.object({
+        request: z.string(),
+    }),
+});
+type LambdaInput = z.infer<typeof lambdaInputSchema>;
+
+
+import { SystemMessage, HumanMessage } from "@langchain/core/messages";
+// ... (keep other imports)
+
+// ... (after lambdaInputSchema type definition)
 
 // Load and parse the YAML file
-const prompts_data: any = yaml.load(fs.readFileSync('src/prompts/ch02_routing_prompts.yaml', 'utf8'));
+const promptsData = promptsSchema.parse(yaml.load(fs.readFileSync('src/prompts/ch02_routing_prompts.yaml', 'utf8')));
 
 // Create the prompt from the loaded data
-const coordinator_router_prompt_messages = prompts_data.coordinator_router_prompt.map((msg: { type: string, content: string }) => [msg.type, msg.content]);
-const coordinator_router_prompt = ChatPromptTemplate.fromMessages(coordinator_router_prompt_messages);
+const coordinatorRouterPromptMessages = promptsData.coordinatorRouterPrompt.map((msg) => {
+    switch (msg.type) {
+        case "system":
+            return new SystemMessage(msg.content);
+        case "user":
+            return new HumanMessage(msg.content);
+        default:
+            throw new Error(`Unknown message type: ${msg.type}`);
+    }
+});
+const coordinatorRouterPrompt = ChatPromptTemplate.fromMessages(coordinatorRouterPromptMessages);
 
 // --- Define Simulated Sub-Agent Handlers (equivalent to ADK sub_agents) ---
 
-const booking_handler = (request: string): string => {
+const bookingHandler = (request: string): string => {
     console.log("\n--- DELEGATING TO BOOKING HANDLER ---");
     return `Booking Handler processed request: '${request}'. Result: Simulated booking action.`;
 }
 
-const info_handler = (request: string): string => {
+const infoHandler = (request: string): string => {
     console.log("\n--- DELEGATING TO INFO HANDLER ---");
     return `Info Handler processed request: '${request}'. Result: Simulated information retrieval.`;
 }
 
-const unclear_handler = (request: string): string => {
+const unclearHandler = (request: string): string => {
     console.log("\n--- HANDLING UNCLEAR REQUEST ---");
     return `Coordinator could not delegate request: '${request}'. Please clarify.`;
 }
@@ -53,50 +89,53 @@ const main = async () => {
 
     const nonNullableLlm = llm; // TypeScript will now infer nonNullableLlm as BaseChatModel
 
-    const coordinator_router_chain = coordinator_router_prompt.pipe(nonNullableLlm).pipe(new StringOutputParser());
+    const coordinatorRouterChain = coordinatorRouterPrompt
+        .pipe(nonNullableLlm)
+        .pipe(new StringOutputParser())
+        .pipe((output: string) => routerOutputSchema.parse(output.trim()));
 
-    const delegation_branch = new RunnableBranch({
+    const delegationBranch = new RunnableBranch({
         branches: [
             [
                 new RunnableLambda({
-                    func: (x: { decision: string; request: { request: string } }) => x.decision.trim() === 'booker'
+                    func: (x: LambdaInput) => x.decision === 'booker'
                 }),
-                RunnablePassthrough.assign({output: (x: { decision: string; request: { request: string } }) => booking_handler(x.request.request)})
+                RunnablePassthrough.assign({output: (x: LambdaInput) => bookingHandler(x.request.request)})
             ],
             [
                 new RunnableLambda({
-                    func: (x: { decision: string; request: { request: string } }) => x.decision.trim() === 'info'
+                    func: (x: LambdaInput) => x.decision === 'info'
                 }),
-                RunnablePassthrough.assign({output: (x: { decision:string; request: { request: string } }) => info_handler(x.request.request)})
+                RunnablePassthrough.assign({output: (x: LambdaInput) => infoHandler(x.request.request)})
             ],
         ],
-        default: RunnablePassthrough.assign({output: (x: { decision: string; request: { request: string } }) => unclear_handler(x.request.request)})
+        default: RunnablePassthrough.assign({output: (x: LambdaInput) => unclearHandler(x.request.request)})
     });
 
 
     // Combine the router chain and the delegation branch into a single runnable
     // The router chain's output ('decision') is passed along with the original input ('request')
     // to the delegation_branch.
-    const coordinator_agent = RunnablePassthrough.assign({
-        decision: coordinator_router_chain,
+    const coordinatorAgent = RunnablePassthrough.assign({
+        decision: coordinatorRouterChain,
         request: (input: { request: string }) => ({ request: input.request }) // Wrap the request string in an object
     })
-    .pipe(delegation_branch)
+    .pipe(delegationBranch)
     .pipe((x: { output: string }) => x.output);
 
     console.log("--- Running with a booking request ---");
-    const request_a = "Book me a flight to London.";
-    const result_a = await coordinator_agent.invoke({ "request": request_a });
-    console.log(`Final Result A: ${result_a}`);
+    const requestA = "Book me a flight to London.";
+    const resultA = await coordinatorAgent.invoke({ "request": requestA });
+    console.log(`Final Result A: ${resultA}`);
 
     console.log("\n--- Running with an info request ---");
-    const request_b = "What is the capital of Italy?";
-    const result_b = await coordinator_agent.invoke({ "request": request_b });
-    console.log(`Final Result B: ${result_b}`);
+    const requestB = "What is the capital of Italy?";
+    const resultB = await coordinatorAgent.invoke({ "request": requestB });
+    console.log(`Final Result B: ${resultB}`);
 
     console.log("\n--- Running with an unclear request ---");
-    const request_c = "Tell me about quantum physics.";
-    const result_c = await coordinator_agent.invoke({ "request": request_c });
-    console.log(`Final Result C: ${result_c}`);
+    const requestC = "Tell me about quantum physics.";
+    const resultC = await coordinatorAgent.invoke({ "request": requestC });
+    console.log(`Final Result C: ${resultC}`);
 }
 main().catch(console.error);

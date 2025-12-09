@@ -1,4 +1,4 @@
-coordinator_router_prompt:
+coordinatorRouterPrompt:
   - type: system
     content: |
       Analyze the user's request and determine which specialist handler should process it.

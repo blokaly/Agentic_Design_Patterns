@@ -1,5 +1,4 @@
 import {ChatPromptTemplate,} from "@langchain/core/prompts";
-import {StringOutputParser} from "@langchain/core/output_parsers";
 import {RunnablePassthrough} from "@langchain/core/runnables";
 import {ChatOpenAI} from "@langchain/openai";
 import {FakeListChatModel} from "@langchain/core/utils/testing";
@@ -7,15 +6,45 @@ import {config} from "./config.js";
 import {BaseChatModel} from "@langchain/core/language_models/chat_models";
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import { z } from 'zod';
+import {StringOutputParser} from "@langchain/core/output_parsers";
+
+// Define Zod schema for prompts
+const promptsSchema = z.object({
+    promptExtract: z.object({
+        template: z.string(),
+    }),
+    promptTransform: z.object({
+        template: z.string(),
+    }),
+});
 
 // Load and parse the YAML file
-const prompts_data: any = yaml.load(fs.readFileSync('src/prompts/ch01_chaining_prompts.yaml', 'utf8'));
+const promptsData = promptsSchema.parse(yaml.load(fs.readFileSync('src/prompts/ch01_chaining_prompts.yaml', 'utf8')));
+
+// Define Zod schema for the output
+const techSpecSchema = z.object({
+    cpu: z.string(),
+    memory: z.string(),
+    storage: z.string(),
+});
+
 
 // --- Prompt 1: Extract Information ---
-const promptExtract = ChatPromptTemplate.fromTemplate(prompts_data.promptExtract.template);
+const promptExtract = ChatPromptTemplate.fromTemplate(promptsData.promptExtract.template);
 
 // --- Prompt 2: Transform to JSON ---
-const promptTransform = ChatPromptTemplate.fromTemplate(prompts_data.promptTransform.template);
+const formatInstructions = `
+The output should be a markdown code block with a JSON object inside, like this:
+\`\`\`json
+{
+  "cpu": "string",
+  "memory": "string",
+  "storage": "string"
+}
+\`\`\`
+`;
+const promptTransform = ChatPromptTemplate.fromTemplate(promptsData.promptTransform.template + formatInstructions);
 
 /**
  * Main function to run the LangChain sequence.
@@ -24,15 +53,9 @@ const runSpecificationChain = async (llm: BaseChatModel) => {
     // --- Build the Chain using LCEL ---
 
     // 1. Extraction Chain: Extracts raw specifications from text_input
-    // The StringOutputParser() converts the LLM's message output to a simple string.
     const extractionChain = promptExtract.pipe(llm).pipe(new StringOutputParser());
 
     // 2. Full Chain: Combines the extraction and transformation steps.
-    // The output of the extractionChain (the specifications string) is passed
-    // into the 'specifications' key for the transformation prompt.
-
-    // RunnablePassthrough.assign is used to create a new object.
-    // We use RunnablePassthrough.assign to call extractionChain and assign its result to the 'specifications' key.
     const fullChain = RunnablePassthrough.assign({
         specifications: extractionChain,
     })
@@ -41,13 +64,16 @@ const runSpecificationChain = async (llm: BaseChatModel) => {
         .pipe(new StringOutputParser());
 
     // --- Run the Chain ---
-    const input_text =
+    const inputText =
         "The new laptop model features a 3.5 GHz octa-core processor, 16GB of RAM, and a 1TB NVMe SSD.";
 
     // Execute the chain with the input text dictionary.
-    const finalResult = await fullChain.invoke({
-        text_input: input_text,
+    const finalResultString = await fullChain.invoke({
+        textInput: inputText,
     });
+
+    const jsonString = finalResultString.replace(/```json\n|\n```/g, '');
+    const finalResult = techSpecSchema.parse(JSON.parse(jsonString));
 
     console.log("\n--- Final JSON Output ---");
     console.log(finalResult);
@@ -62,7 +88,9 @@ const main = async () => {
         llm = new FakeListChatModel({
             responses: [
                 "CPU: 3.5 GHz octa-core processor, Memory: 16GB of RAM, Storage: 1TB NVMe SSD",
-                `{"cpu": "3.5 GHz octa-core processor", "memory": "16GB of RAM", "storage": "1TB NVMe SSD"}`
+                `\`\`\`json
+{"cpu": "3.5 GHz octa-core processor", "memory": "16GB of RAM", "storage": "1TB NVMe SSD"}
+\`\`\``
             ]
         });
     } else {
