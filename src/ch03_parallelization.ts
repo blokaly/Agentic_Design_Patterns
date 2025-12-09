@@ -97,7 +97,7 @@ const main = async () => {
         });
     } else {
         console.log("OPENAI_API_KEY is set. Using ChatOpenAI.");
-        llm = new ChatOpenAI({apiKey: config.OPENAI_API_KEY, temperature: 0.7, model: "gpt-4o-mini"});
+        llm = new ChatOpenAI({apiKey: config.OPENAI_API_KEY, temperature: 0.7});
     }
 
     if (!llm) {
