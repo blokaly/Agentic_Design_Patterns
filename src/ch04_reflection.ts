@@ -133,7 +133,6 @@ const main = async () => {
             apiKey: config.XAI_API_KEY,
             model: "grok-code-fast-1",
             temperature: 0.1
-
         });
     }
 

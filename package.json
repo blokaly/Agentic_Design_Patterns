@@ -9,7 +9,8 @@
     "demo1": "tsx src/ch01_chaining.ts",
     "demo2": "tsx src/ch02_routing.ts",
     "demo3": "tsx src/ch03_parallelization.ts",
-    "demo4": "tsx src/ch04_reflection.ts"
+    "demo4": "tsx src/ch04_reflection.ts",
+    "demo5": "tsx src/ch05_tool.ts"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "@types/js-yaml": "^4.0.9",
     "dotenv": "^17.2.3",
     "js-yaml": "^4.1.1",
+    "langchain": "^1.1.5",
     "tsx": "^4.21.0",
     "zod": "^4.1.13"
   }
