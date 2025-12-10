@@ -10,7 +10,8 @@
     "demo2": "tsx src/ch02_routing.ts",
     "demo3": "tsx src/ch03_parallelization.ts",
     "demo4": "tsx src/ch04_reflection.ts",
-    "demo5": "tsx src/ch05_tool.ts"
+    "demo5": "tsx src/ch05_tool.ts",
+    "demo6": "tsx src/ch06_planning.ts"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "dotenv": "^17.2.3",
     "js-yaml": "^4.1.1",
     "langchain": "^1.1.5",
+    "openai": "^6.10.0",
     "tsx": "^4.21.0",
     "zod": "^4.1.13"
   }
