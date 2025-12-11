@@ -16,7 +16,8 @@
     "demo4": "tsx src/ch04_reflection.ts",
     "demo5": "tsx src/ch05_tool.ts",
     "demo6": "tsx src/ch06_planning.ts",
-    "demo7": "tsx src/ch07_multiagent.ts"
+    "demo7": "tsx src/ch07_multi_agent.ts",
+    "demo8_sms": "tsx src/ch08_short_mem_sum.ts"
   },
   "repository": {
     "type": "git",
