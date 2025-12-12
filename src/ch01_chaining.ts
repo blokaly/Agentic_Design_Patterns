@@ -17,6 +17,7 @@ const promptsSchema = z.object({
   promptTransform: z.object({
     template: z.string(),
   }),
+  formatInstructions: z.string(),
 });
 
 // Load and parse the YAML file
@@ -37,18 +38,8 @@ const promptExtract = ChatPromptTemplate.fromTemplate(
 );
 
 // --- Prompt 2: Transform to JSON ---
-const formatInstructions = `
-The output should be a markdown code block with a JSON object inside, like this:
-\`\`\`json
-{
-  "cpu": "string",
-  "memory": "string",
-  "storage": "string"
-}
-\`\`\`
-`;
 const promptTransform = ChatPromptTemplate.fromTemplate(
-  promptsData.promptTransform.template + formatInstructions,
+  promptsData.promptTransform.template + promptsData.formatInstructions,
 );
 
 /**

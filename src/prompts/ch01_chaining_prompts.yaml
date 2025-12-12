@@ -7,3 +7,13 @@ promptTransform:
   template: |
     Transform the following specifications into a JSON object with 'cpu', 'memory', and 'storage' as keys:
     {specifications}
+
+formatInstructions: |
+  The output should be a markdown code block with a JSON object inside, like this:
+  ```json
+  {
+    "cpu": "string",
+    "memory": "string",
+    "storage": "string"
+  }
+  ```

@@ -3,6 +3,25 @@ import { createAgent, tool } from "langchain";
 import { config } from "./config.js";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { z } from "zod";
+import * as fs from "fs";
+import * as yaml from "js-yaml";
+
+// --- Zod Schema for Prompts ---
+const promptsSchema = z.object({
+  searchInformationTool: z.object({
+    description: z.string(),
+    schema: z.object({
+      query: z.object({
+        describe: z.string(),
+      }),
+    }),
+  }),
+});
+
+// Load prompts from external YAML file
+const promptsData = promptsSchema.parse(
+  yaml.load(fs.readFileSync("src/prompts/ch05_tool_prompts.yaml", "utf8")),
+);
 
 // --- Define a Tool ---
 const searchInformationTool = tool(
@@ -30,12 +49,11 @@ const searchInformationTool = tool(
   },
   {
     name: "search_information",
-    description:
-      "Provides factual information on a given topic. Use this tool to find answers to questions like 'What is the capital of France?' or 'What is the weather in London?'.",
+    description: promptsData.searchInformationTool.description,
     schema: z.object({
       query: z
         .string()
-        .describe("The search query or question the user wants answered"),
+        .describe(promptsData.searchInformationTool.schema.query.describe),
     }),
   },
 );

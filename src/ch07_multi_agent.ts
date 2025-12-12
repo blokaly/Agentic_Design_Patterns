@@ -5,8 +5,39 @@ import { config } from "./config.js";
 import { SystemMessage } from "@langchain/core/messages";
 import { createAgent } from "langchain";
 import { ChatXAI } from "@langchain/xai";
+import * as fs from "fs";
+import * as yaml from "js-yaml";
 // import { MemorySaver } from "@langchain/langgraph";
 // import { createDeepAgent } from "deepagents";
+
+// --- Zod Schema for Prompts ---
+const promptsSchema = z.object({
+  internetSearch: z.object({
+    description: z.string(),
+    schema: z.object({
+      query: z.object({
+        describe: z.string(),
+      }),
+      maxResults: z.object({
+        describe: z.string(),
+      }),
+      topic: z.object({
+        describe: z.string(),
+      }),
+      includeRawContent: z.object({
+        describe: z.string(),
+      }),
+    }),
+  }),
+  researchInstructions: z.string(),
+});
+
+// Load prompts from external YAML file
+const promptsData = promptsSchema.parse(
+  yaml.load(
+    fs.readFileSync("src/prompts/ch07_multi_agent_prompts.yaml", "utf8"),
+  ),
+);
 
 const internetSearch = tool(
   async ({
@@ -30,24 +61,26 @@ const internetSearch = tool(
   },
   {
     name: "internet_search",
-    description: "Run a web search",
+    description: promptsData.internetSearch.description,
     schema: z.object({
-      query: z.string().describe("The search query"),
+      query: z
+        .string()
+        .describe(promptsData.internetSearch.schema.query.describe),
       maxResults: z
         .number()
         .optional()
         .default(5)
-        .describe("Maximum number of results to return"),
+        .describe(promptsData.internetSearch.schema.maxResults.describe),
       topic: z
         .enum(["general", "news", "finance"])
         .optional()
         .default("general")
-        .describe("Search topic category"),
+        .describe(promptsData.internetSearch.schema.topic.describe),
       includeRawContent: z
         .boolean()
         .optional()
         .default(false)
-        .describe("Whether to include raw content"),
+        .describe(promptsData.internetSearch.schema.includeRawContent.describe),
     }),
   },
 );
@@ -64,15 +97,6 @@ const main = async () => {
     model,
     tools,
   });
-
-  const researchInstructions = `You are an expert researcher. Your job is to conduct thorough research and then write a polished report.
-
-You have access to an internet search tool as your primary means of gathering information.
-
-## \`internet_search\`
-
-Use this to run an internet search for a given query. You can specify the max number of results to return, the topic, and whether raw content should be included.
-`;
 
   // const subagents = [{
   //     name: "research-agent",
@@ -98,7 +122,7 @@ Use this to run an internet search for a given query. You can specify the max nu
 
   const result = await agent.invoke({
     messages: [
-      new SystemMessage(researchInstructions),
+      new SystemMessage(promptsData.researchInstructions),
       { role: "user", content: "What is langgraph?" },
     ],
   });

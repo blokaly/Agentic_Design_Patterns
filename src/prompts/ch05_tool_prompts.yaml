@@ -1,0 +1,5 @@
+searchInformationTool:
+  description: "Provides factual information on a given topic. Use this tool to find answers to questions like 'What is the capital of France?' or 'What is the weather in London?'."
+  schema:
+    query:
+      describe: "The search query or question the user wants answered"
