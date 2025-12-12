@@ -29,6 +29,7 @@ interface InputTextContent {
   text: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface InputItem {
   role: "developer" | "user";
   content: InputTextContent[];

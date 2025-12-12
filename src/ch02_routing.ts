@@ -24,6 +24,7 @@ const promptsSchema = z.object({
 
 const routerOutputSchema = z.enum(["booker", "info", "unclear"]);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const lambdaInputSchema = z.object({
   decision: routerOutputSchema,
   request: z.object({

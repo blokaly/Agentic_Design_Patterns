@@ -23,6 +23,7 @@ const promptsSchema = z.object({
   synthesisPrompt: z.array(messageSchema),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const inputSchema = z.object({
   topic: z.string(),
 });

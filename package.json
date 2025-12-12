@@ -17,7 +17,8 @@
     "demo5": "tsx src/ch05_tool.ts",
     "demo6": "tsx src/ch06_planning.ts",
     "demo7": "tsx src/ch07_multi_agent.ts",
-    "demo8_sms": "tsx src/ch08_short_mem_sum.ts"
+    "demo8_sms": "tsx src/ch08_short_mem_sum.ts",
+    "demo8_lme": "tsx src/ch08_long_mem_embed.ts"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "typescript-eslint": "^8.49.0"
   },
   "dependencies": {
+    "@langchain/community": "^1.0.7",
     "@langchain/core": "^1.1.4",
     "@langchain/langgraph": "^1.0.4",
     "@langchain/openai": "^1.1.3",

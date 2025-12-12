@@ -23,6 +23,9 @@ export default tseslint.config(
       "@typescript-eslint/no-inferrable-types": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
+
+      // Customize rules here, e.g., enforce stricter typing
+      "@typescript-eslint/no-unused-vars": "error",
     },
   },
   {
@@ -33,13 +36,6 @@ export default tseslint.config(
     },
     files: ["**/*.ts", "**/*.tsx"], // Only lint TS files
   },
-  {
-    rules: {
-      // Customize rules here, e.g., enforce stricter typing
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/explicit-function-return-type": "warn", // Optional: Enforce return types
-    },
-  },
   prettierConfig, // Disables ESLint formatting rules
   {
     plugins: {
@@ -47,7 +43,6 @@ export default tseslint.config(
     },
     rules: {
       "prettier/prettier": "error", // Enforces Prettier as a rule
-      // ... other rules
     },
   },
 );

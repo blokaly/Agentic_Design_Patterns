@@ -65,19 +65,13 @@ const runAgentWithTool = async (agentExecutor: any, query: string) => {
 };
 
 const main = async () => {
-  let model: BaseChatModel;
+  const model: BaseChatModel = new ChatOpenAI({
+    apiKey: config.OPENAI_API_KEY || "dummy-key", // Use provided key or dummy
+    temperature: 0,
+  });
 
   if (!config.OPENAI_API_KEY) {
     console.log("OPENAI_API_KEY is not set. Using a dummy key.");
-    config.OPENAI_API_KEY = "dummy-key";
-  }
-  model = new ChatOpenAI({ apiKey: config.OPENAI_API_KEY, temperature: 0 });
-
-  if (!model) {
-    console.log(
-      "\nSkipping agent execution due to LLM initialization failure.",
-    );
-    return;
   }
 
   console.log(`✅ Language model initialized`);
