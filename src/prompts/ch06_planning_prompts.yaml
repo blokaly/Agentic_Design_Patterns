@@ -1,4 +1,4 @@
-system_message: |
+systemMessage: |
   You are a professional researcher preparing a structured, data-driven report.
   Focus on data-rich insights, use reliable sources, and include inline citations.
-user_query: "Research the economic impact of semaglutide on global healthcare systems."
+userQuery: "Research the economic impact of semaglutide on global healthcare systems."

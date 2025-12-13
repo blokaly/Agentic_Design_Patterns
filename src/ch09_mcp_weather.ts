@@ -11,8 +11,7 @@ const server = new McpServer({
   version: "0.1.0",
 });
 
-// Define the get_weather tool
-async function get_weather(location: string): Promise<CallToolResult> {
+const getWeather = async (location: string): Promise<CallToolResult> => {
   return {
     content: [
       {
@@ -21,7 +20,7 @@ async function get_weather(location: string): Promise<CallToolResult> {
       },
     ],
   };
-}
+};
 
 // Define a simple Zod object as inputSchema for get_weather
 const toolInputSchema = z.object({
@@ -34,7 +33,7 @@ server.registerTool(
     description: "Get weather for location",
     inputSchema: toolInputSchema,
   },
-  ({ location }) => get_weather(location),
+  ({ location }) => getWeather(location),
 );
 
 const app = express();

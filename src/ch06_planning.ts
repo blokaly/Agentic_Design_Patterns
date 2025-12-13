@@ -6,77 +6,77 @@ import { z } from "zod";
 
 // --- Zod Schema for Prompts ---
 const promptsSchema = z.object({
-  system_message: z.string(),
-  user_query: z.string(),
+  systemMessage: z.string(),
+  userQuery: z.string(),
 });
 
 // --- Enhanced TypeScript Interfaces for the Deep Research API Response ---
-interface Annotation {
+interface IAnnotation {
   start_index: number;
   end_index: number;
   title: string;
   url: string;
 }
 
-interface TextContent {
+interface ITextContent {
   type: "text";
   text: string;
-  annotations?: Annotation[];
+  annotations?: IAnnotation[];
 }
 
-interface InputTextContent {
+interface IInputTextContent {
   type: "input_text";
   text: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface InputItem {
+interface IInputItem {
   role: "developer" | "user";
-  content: InputTextContent[];
+  content: IInputTextContent[];
 }
 
-interface ReasoningSummaryPart {
+interface IReasoningSummaryPart {
   text: string;
 }
 
-interface ReasoningStep {
+interface IReasoningStep {
   type: "reasoning";
-  summary: ReasoningSummaryPart[];
+  summary: IReasoningSummaryPart[];
 }
 
-interface WebSearchAction {
+interface IWebSearchAction {
   query: string;
 }
 
-interface WebSearchCall {
+interface IWebSearchCall {
   type: "web_search_call";
-  action: WebSearchAction;
+  action: IWebSearchAction;
   status: string;
 }
 
-interface CodeInterpreterCall {
+interface ICodeInterpreterCall {
   type: "code_interpreter_call";
   input: string;
   output: string;
 }
 
-interface FinalReport {
+interface IFinalReport {
   type: "final_report";
-  content: TextContent[];
+  content: ITextContent[];
 }
 
 type ResponseOutput =
-  | ReasoningStep
-  | WebSearchCall
-  | CodeInterpreterCall
-  | FinalReport;
+  | IReasoningStep
+  | IWebSearchCall
+  | ICodeInterpreterCall
+  | IFinalReport;
 
-interface DeepResearchResponse {
+interface IDeepResearchResponse {
   output?: ResponseOutput[];
 }
 
 // --- Main Application Logic ---
-async function runDeepResearch() {
+const runDeepResearch = async () => {
   if (!config.OPENAI_API_KEY) {
     console.error(
       "OPENAI_API_KEY is not set. Please add it to your .env file.",
@@ -92,23 +92,23 @@ async function runDeepResearch() {
       fs.readFileSync("src/prompts/ch06_planning_prompts.yaml", "utf8"),
     ),
   );
-  const { system_message, user_query } = promptsData;
+  const { systemMessage, userQuery } = promptsData;
 
   try {
     console.log("Starting deep research with o3-deep-research...\n");
 
     // The 'responses.create' method is not in the official typings, so we cast to 'any'
     // while still typing the expected 'response' variable.
-    const response: DeepResearchResponse = await (
+    const response: IDeepResearchResponse = await (
       client as any
     ).responses.create({
       model: "o3-deep-research-2025-06-26",
       input: [
         {
           role: "developer",
-          content: [{ type: "input_text", text: system_message }],
+          content: [{ type: "input_text", text: systemMessage }],
         },
-        { role: "user", content: [{ type: "input_text", text: user_query }] },
+        { role: "user", content: [{ type: "input_text", text: userQuery }] },
       ],
       reasoning: { summary: "auto" },
       tools: [{ type: "web_search_preview" }],
@@ -122,7 +122,7 @@ async function runDeepResearch() {
     // --- Extract and Print Final Report ---
     const finalReportItem = response.output.find(
       (item) => item.type === "final_report",
-    ) as FinalReport | undefined;
+    ) as IFinalReport | undefined;
     const finalContent = finalReportItem?.content?.[0];
 
     if (!finalContent?.text) {
@@ -142,7 +142,7 @@ async function runDeepResearch() {
     if (annotations.length === 0) {
       console.log("No annotations found in the report.");
     } else {
-      annotations.forEach((citation: Annotation, i: number) => {
+      annotations.forEach((citation: IAnnotation, i: number) => {
         const citedText = finalReportText.slice(
           citation.start_index,
           citation.end_index,
@@ -163,7 +163,7 @@ async function runDeepResearch() {
 
     const reasoningStep = response.output.find(
       (item) => item.type === "reasoning",
-    ) as ReasoningStep | undefined;
+    ) as IReasoningStep | undefined;
     if (reasoningStep) {
       console.log("[Found a Reasoning Step]");
       reasoningStep.summary?.forEach((part) => console.log(`  - ${part.text}`));
@@ -173,7 +173,7 @@ async function runDeepResearch() {
 
     const searchStep = response.output.find(
       (item) => item.type === "web_search_call",
-    ) as WebSearchCall | undefined;
+    ) as IWebSearchCall | undefined;
     if (searchStep) {
       console.log("\n[Found a Web Search Call]");
       console.log(`  Query Executed: '${searchStep.action.query}'`);
@@ -184,7 +184,7 @@ async function runDeepResearch() {
 
     const codeStep = response.output.find(
       (item) => item.type === "code_interpreter_call",
-    ) as CodeInterpreterCall | undefined;
+    ) as ICodeInterpreterCall | undefined;
     if (codeStep) {
       console.log("\n[Found a Code Execution Step]");
       console.log("  Code Input:\n  ```python\n" + codeStep.input + "\n  ```");
@@ -195,6 +195,6 @@ async function runDeepResearch() {
   } catch (error: any) {
     console.error("Error during deep research:", error.message || error);
   }
-}
+};
 
 runDeepResearch().catch(console.error);

@@ -20,7 +20,8 @@
     "demo8_sms": "tsx src/ch08_short_mem_sum.ts",
     "demo8_lme": "tsx src/ch08_long_mem_embed.ts",
     "demo9_weather": "tsx src/ch09_mcp_weather.ts",
-    "demo9_mcp": "tsx src/ch09_mcp_client.ts"
+    "demo9_mcp": "tsx src/ch09_mcp_client.ts",
+    "demo11": "tsx src/ch11_goal_setting.ts"
   },
   "repository": {
     "type": "git",

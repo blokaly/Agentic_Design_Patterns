@@ -9,7 +9,7 @@ const server = new McpServer({
 });
 
 // Define the addition tool
-async function add(a: number, b: number): Promise<CallToolResult> {
+const add = async (a: number, b: number): Promise<CallToolResult> => {
   const sum = a + b;
   return {
     content: [
@@ -19,7 +19,7 @@ async function add(a: number, b: number): Promise<CallToolResult> {
       },
     ],
   };
-}
+};
 
 // Define a simple Zod object as inputSchema
 const toolInputSchema = z.object({
@@ -37,10 +37,10 @@ server.registerTool(
   ({ a, b }) => add(a, b),
 );
 
-async function main() {
+const main = async () => {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Math MCP server running on stdio");
-}
+};
 
 main().catch(console.error);

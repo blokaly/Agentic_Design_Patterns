@@ -1,0 +1,42 @@
+generatePrompt: |
+  You are an AI coding agent. Your job is to write Python code based on the following use case:
+
+  Use Case: {useCase}
+
+  Your goals are:
+  {goals}
+refinePrompt: |
+  Previously generated code:
+  {previousCode}
+feedbackPrompt: |
+  Feedback on previous version:
+  {feedback}
+endPrompt: |
+  Please return only the revised Python code. Do not include comments or explanations outside the code.
+getCodeFeedback: |
+  You are a Python code reviewer. A code snippet is shown below. Based on the following goals:
+
+  {goals}
+
+  Please critique this code and identify if the goals are met. Mention if improvements are needed for clarity, simplicity, correctness, edge case handling, or test coverage.
+
+  Code:
+  {code}
+goalsMet: |
+  You are an AI reviewer.
+
+  Here are the goals:
+  {goals}
+
+  Here is the feedback on the code:
+  """
+  {feedbackText}
+  """
+
+  Based on the feedback above, have the goals been met?
+
+  Respond with only one word: True or False.
+saveCodeToFile: |
+  Summarize the following use case into a single lowercase word or phrase, no more than 10 characters, suitable for a Python filename:
+
+  {useCase}
