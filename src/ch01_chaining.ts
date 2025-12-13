@@ -1,5 +1,5 @@
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { RunnablePassthrough } from "@langchain/core/runnables";
+import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
+import { RunnableLambda, RunnablePassthrough } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 import { FakeListChatModel } from "@langchain/core/utils/testing";
 import { config } from "./config.js";
@@ -38,9 +38,10 @@ const promptExtract = ChatPromptTemplate.fromTemplate(
 );
 
 // --- Prompt 2: Transform to JSON ---
-const promptTransform = ChatPromptTemplate.fromTemplate(
-  promptsData.promptTransform.template + promptsData.formatInstructions,
-);
+const promptTransform = new PromptTemplate({
+  template: promptsData.promptTransform.template,
+  inputVariables: ["specifications"],
+});
 
 /**
  * Main function to run the LangChain sequence.
@@ -53,11 +54,18 @@ const runSpecificationChain = async (llm: BaseChatModel) => {
     .pipe(llm)
     .pipe(new StringOutputParser());
 
+  const addFormatInstructions = new RunnableLambda({
+    func: async (input: { specifications: string }) => {
+      const prompt = await promptTransform.format(input);
+      return prompt + "\n" + promptsData.formatInstructions;
+    },
+  });
+
   // 2. Full Chain: Combines the extraction and transformation steps.
   const fullChain = RunnablePassthrough.assign({
     specifications: extractionChain,
   })
-    .pipe(promptTransform)
+    .pipe(addFormatInstructions)
     .pipe(llm)
     .pipe(new StringOutputParser());
 

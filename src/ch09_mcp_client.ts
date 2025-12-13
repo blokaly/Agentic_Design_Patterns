@@ -10,11 +10,11 @@ const client = new MultiServerMCPClient({
     // Replace with absolute path to your math_server.js file
     args: ["./dist/ch09_mcp_math.js"],
   },
-  // weather: {
-  //   transport: "streamable_http", // HTTP-based remote server
-  //   // Ensure you start your weather server on port 8000
-  //   url: "http://localhost:8000/mcp",
-  // },
+  weather: {
+    transport: "http",
+    // Ensure you start your weather server on port 3000
+    url: "http://localhost:3000/mcp",
+  },
 });
 
 const model = new ChatXAI({
@@ -33,11 +33,15 @@ const main = async () => {
     messages: [{ role: "user", content: "what's (3 + 5) x 12?" }],
   });
   console.log(mathResponse.messages[mathResponse.messages.length - 1].content);
+
+  const weatherResponse = await agent.invoke({
+    messages: [{ role: "user", content: "what is the weather in nyc?" }],
+  });
+  console.log(
+    weatherResponse.messages[weatherResponse.messages.length - 1].content,
+  );
+
   await client.close();
 };
 
 main().catch(console.error);
-
-// const weatherResponse = await agent.invoke({
-//   messages: [{ role: "user", content: "what is the weather in nyc?" }],
-// });

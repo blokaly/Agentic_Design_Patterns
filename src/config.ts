@@ -9,6 +9,7 @@ const schema = z.object({
   XAI_API_KEY: z.string().optional(),
   TAVILY_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  SERVER_PORT: z.number().optional().default(3000),
 });
 
 export const config = schema.parse(process.env);
