@@ -22,7 +22,8 @@
     "demo9_weather": "tsx src/ch09_mcp_weather.ts",
     "demo9_mcp": "tsx src/ch09_mcp_client.ts",
     "demo11": "tsx src/ch11_goal_setting.ts",
-    "demo12": "tsx src/ch12_exception.ts"
+    "demo12": "tsx src/ch12_exception.ts",
+    "demo13": "tsx src/ch13_hitl.ts"
   },
   "repository": {
     "type": "git",
