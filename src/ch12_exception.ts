@@ -1,4 +1,4 @@
-import { END, StateGraph } from "@langchain/langgraph";
+import { END, StateGraph, START } from "@langchain/langgraph";
 import * as z from "zod";
 
 // --- 1. Define the Shared State Interface ---
@@ -131,10 +131,10 @@ const robustLocationWorkflow = new StateGraph(LocationState)
   .addNode("primary_handler", primary_handler)
   .addNode("fallback_handler", fallback_handler)
   .addNode("response_agent", response_agent)
-  .setEntryPoint("primary_handler")
+  .addEdge(START, "primary_handler")
   .addEdge("primary_handler", "fallback_handler")
   .addEdge("fallback_handler", "response_agent")
-  .setFinishPoint("response_agent");
+  .addEdge("response_agent", END);
 
 const robust_location_agent = robustLocationWorkflow.compile();
 
