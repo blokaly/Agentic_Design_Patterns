@@ -3,30 +3,30 @@ import * as z from "zod";
 
 // --- 1. Define the Shared State Interface ---
 // This interface defines all the data passed between the sequential agents.
-const LocationState = z.object({
+const LocationStateSchema = z.object({
   // Original query from the user (e.g., "Find 123 Fake St, Los Angeles")
   query: z.string(),
 
   // Result from the primary (precise) lookup attempt
-  precise_location_result: z.string().optional(),
+  preciseLocationResult: z.string().optional(),
 
   // Flag set by the primary handler to signal failure
-  primary_location_failed: z.boolean().default(false),
+  primaryLocationFailed: z.boolean().default(false),
 
   // Result from the fallback (general area) lookup
-  general_area_result: z.string().optional(),
+  generalAreaResult: z.string().optional(),
 
   // The final message to be presented to the user
-  final_response_message: z.string().default(""),
+  finalResponseMessage: z.string().default(""),
 });
 
-type LocationState = z.infer<typeof LocationState>;
+type ILocationState = z.infer<typeof LocationStateSchema>;
 
 // --- 2. Tool Placeholders (Mocking the ADK tools) ---
 // These functions simulate the execution of the tools the agents are instructed to use.
 type Tool = (input: string) => Promise<string>;
 
-const get_precise_location_info: Tool = async (address: string) => {
+const getPreciseLocationInfo: Tool = async (address: string) => {
   console.log(`[Tool] Attempting precise lookup for: "${address}"`);
 
   // Simulate success for a known address
@@ -40,7 +40,7 @@ const get_precise_location_info: Tool = async (address: string) => {
   );
 };
 
-const get_general_area_info: Tool = async (city: string) => {
+const getGeneralAreaInfo: Tool = async (city: string) => {
   console.log(`[Tool] Attempting general lookup for city: "${city}"`);
   return `General Area Info for ${city}: Climate is moderate, nearest airport is LAX.`;
 };
@@ -51,27 +51,27 @@ const get_general_area_info: Tool = async (city: string) => {
  * Node 1: Primary Handler
  * Tries the precise location tool and sets a failure flag if it fails.
  */
-const primary_handler = async (
-  state: LocationState,
-): Promise<Partial<LocationState>> => {
+const primaryHandler = async (
+  state: ILocationState,
+): Promise<Partial<ILocationState>> => {
   console.log("--- Executing Primary Handler ---");
-  let precise_location_result: string | undefined;
-  let primary_location_failed = false;
+  let preciseLocationResult: string | undefined;
+  let primaryLocationFailed = false;
 
   try {
     // In a real LangGraph agent, this would be an LLM call that decides to use the tool.
     // Here we simulate the direct tool use and error handling based on the ADK instruction.
-    precise_location_result = await get_precise_location_info(state.query);
+    preciseLocationResult = await getPreciseLocationInfo(state.query);
   } catch (error) {
     if (error instanceof Error) {
       console.error(`Primary Handler failed: ${error.message}`);
     }
-    primary_location_failed = true;
+    primaryLocationFailed = true;
   }
 
   return {
-    precise_location_result,
-    primary_location_failed,
+    preciseLocationResult,
+    primaryLocationFailed,
   };
 };
 
@@ -79,21 +79,21 @@ const primary_handler = async (
  * Node 2: Fallback Handler
  * Checks the failure flag from Node 1. If true, it executes the general area tool.
  */
-const fallback_handler = async (
-  state: LocationState,
-): Promise<Partial<LocationState>> => {
+const fallbackHandler = async (
+  state: ILocationState,
+): Promise<Partial<ILocationState>> => {
   console.log("--- Executing Fallback Handler ---");
 
-  if (state.primary_location_failed) {
+  if (state.primaryLocationFailed) {
     // LLM instruction: "extract the city from the user's original query"
     // We simulate this extraction (assuming the city is always the last word for simplicity)
     const queryParts = state.query.split(",").map((p) => p.trim());
     const city = queryParts[queryParts.length - 1];
     console.log(`Fallback triggered. Extracted city: ${city}`);
 
-    const general_area_result = await get_general_area_info(city);
+    const generalAreaResult = await getGeneralAreaInfo(city);
 
-    return { general_area_result };
+    return { generalAreaResult };
   } else {
     console.log("Primary Handler succeeded. Skipping fallback.");
     return {}; // No state changes needed
@@ -104,43 +104,43 @@ const fallback_handler = async (
  * Node 3: Response Agent
  * Reviews the accumulated state and generates the final user response.
  */
-const response_agent = async (
-  state: LocationState,
-): Promise<Partial<LocationState>> => {
+const responseAgent = async (
+  state: ILocationState,
+): Promise<Partial<ILocationState>> => {
   console.log("--- Executing Response Agent ---");
-  let final_response_message: string;
+  let finalResponseMessage: string;
 
-  if (state.precise_location_result) {
+  if (state.preciseLocationResult) {
     // Primary succeeded
-    final_response_message = `Successfully found precise location information based on your query "${state.query}". Result: ${state.precise_location_result}`;
-  } else if (state.general_area_result) {
+    finalResponseMessage = `Successfully found precise location information based on your query "${state.query}". Result: ${state.preciseLocationResult}`;
+  } else if (state.generalAreaResult) {
     // Fallback succeeded
-    final_response_message = `Could not find the precise address, but I found general information for the area. Query: "${state.query}". General Info: ${state.general_area_result}`;
+    finalResponseMessage = `Could not find the precise address, but I found general information for the area. Query: "${state.query}". General Info: ${state.generalAreaResult}`;
   } else {
     // Both failed
-    final_response_message =
+    finalResponseMessage =
       "I apologize, but I was unable to retrieve either precise or general location information based on your query. Please try a different query.";
   }
 
-  return { final_response_message };
+  return { finalResponseMessage };
 };
 
 // --- 4. Build the Sequential StateGraph ---
 
-const robustLocationWorkflow = new StateGraph(LocationState)
-  .addNode("primary_handler", primary_handler)
-  .addNode("fallback_handler", fallback_handler)
-  .addNode("response_agent", response_agent)
-  .addEdge(START, "primary_handler")
-  .addEdge("primary_handler", "fallback_handler")
-  .addEdge("fallback_handler", "response_agent")
-  .addEdge("response_agent", END);
+const robustLocationWorkflow = new StateGraph(LocationStateSchema)
+  .addNode("primaryHandler", primaryHandler)
+  .addNode("fallbackHandler", fallbackHandler)
+  .addNode("responseAgent", responseAgent)
+  .addEdge(START, "primaryHandler")
+  .addEdge("primaryHandler", "fallbackHandler")
+  .addEdge("fallbackHandler", "responseAgent")
+  .addEdge("responseAgent", END);
 
 const robust_location_agent = robustLocationWorkflow.compile();
 
 // --- Example Execution ---
 
-async function runSequentialAgent(query: string) {
+const runSequentialAgent = async (query: string) => {
   console.log(`\n--- Running Agent for Query: ${query} ---
 `);
 
@@ -153,8 +153,8 @@ async function runSequentialAgent(query: string) {
   });
 
   console.log("\n--- Final Result ---");
-  console.log(finalState.final_response_message);
-}
+  console.log(finalState.finalResponseMessage);
+};
 
 // Example 1: Successful Primary Lookup (Fallback skipped)
 await runSequentialAgent("123 Fake St, Los Angeles");
