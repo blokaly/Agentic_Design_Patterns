@@ -136,8 +136,6 @@ const robustLocationWorkflow = new StateGraph(LocationStateSchema)
   .addEdge("fallbackHandler", "responseAgent")
   .addEdge("responseAgent", END);
 
-const robust_location_agent = robustLocationWorkflow.compile();
-
 // --- Example Execution ---
 
 const runSequentialAgent = async (query: string) => {
@@ -148,9 +146,11 @@ const runSequentialAgent = async (query: string) => {
     query: query,
   };
 
-  const finalState = await robust_location_agent.invoke(initialState, {
-    configurable: { thread_id: "test-run" },
-  });
+  const finalState = await robustLocationWorkflow
+    .compile()
+    .invoke(initialState, {
+      configurable: { thread_id: "test-run" },
+    });
 
   console.log("\n--- Final Result ---");
   console.log(finalState.finalResponseMessage);
