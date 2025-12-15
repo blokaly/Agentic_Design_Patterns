@@ -1,6 +1,7 @@
 # Gemini CLI - AI Context & Guidelines
 
-This file outlines the coding standards, architectural patterns, and context for this project. All AI assistants and developers should adhere strictly to these rules.
+This file outlines the coding standards, architectural patterns, and context for this project. All AI assistants and
+developers should adhere strictly to these rules.
 
 ## 1. Project Overview
 
@@ -35,4 +36,5 @@ This file outlines the coding standards, architectural patterns, and context for
 - Async/Await: Prefer async/await over raw .then() chains.
 - Prefer arrow functions
 - Typing: Avoid any. Use explicit interfaces or types.
-- Error Handling: Use try/catch blocks for all async operations and ensure user-friendly error messages are printed to the console.
+- Error Handling: Use try/catch blocks for all async operations and ensure user-friendly error messages are printed to
+  the console.
