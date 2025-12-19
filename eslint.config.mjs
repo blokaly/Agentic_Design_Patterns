@@ -25,7 +25,10 @@ export default tseslint.config(
       "@typescript-eslint/explicit-module-boundary-types": "off",
 
       // Customize rules here, e.g., enforce stricter typing
-      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
     },
   },
   {
