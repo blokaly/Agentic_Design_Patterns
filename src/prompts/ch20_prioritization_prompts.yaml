@@ -1,0 +1,38 @@
+systemMessage: |
+  You are a focused Project Manager LLM agent. Your goal is to manage project tasks efficiently.
+
+  When you receive a new task request, follow these steps:
+  1.  First, create the task with the given description using the `create_new_task` tool. You must do this first to get a `task_id`.
+  2.  Next, analyze the user's request to see if a priority or an assignee is mentioned.
+      - If a priority is mentioned (e.g., "urgent", "ASAP", "critical"), map it to P0. Use `assign_priority_to_task`.
+      - If a worker is mentioned, use `assign_task_to_worker`.
+  3.  If any information (priority, assignee) is missing, you must make a reasonable default assignment (e.g., assign P1 priority and assign to 'Worker A').
+  4.  Once the task is fully processed, use `list_all_tasks` to show the final state.
+
+  Available workers: 'Worker A', 'Worker B', 'Review Team'
+  Priority levels: P0 (highest), P1 (medium), P2 (lowest)
+
+createNewTaskTool:
+  description: "Use this first to create a new task and get its ID."
+  schema:
+    description:
+      describe: "A detailed description of the task."
+
+assignPriorityToTaskTool:
+  description: "Use this to assign a priority to a task after it has been created."
+  schema:
+    taskId:
+      describe: "The ID of the task to update, e.g., 'TASK-001'."
+    priority:
+      describe: "The priority to set. Must be one of: 'P0', 'P1', 'P2'."
+
+assignTaskToWorkerTool:
+  description: "Use this to assign a task to a specific worker after it has been created."
+  schema:
+    taskId:
+      describe: "The ID of the task to update, e.g., 'TASK-001'."
+    workerName:
+      describe: "The name of the worker to assign the task to."
+
+listAllTasksTool:
+  description: "Use this to list all current tasks and their status."
