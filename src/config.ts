@@ -11,6 +11,8 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   TMDB_API_KEY: z.string().optional(),
+  GOOGLE_CUSTOM_SEARCH_API_KEY: z.string().optional(),
+  GOOGLE_CSE_ID: z.string().optional(),
   SERVER_PORT: z.number().optional().default(3000),
 });
 

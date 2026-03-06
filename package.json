@@ -26,7 +26,8 @@
     "demo13": "tsx src/ch13_hitl.ts",
     "demo14": "tsx src/ch14_rag.ts",
     "demo15:agent": "tsx src/ch15_a2a_agent.ts",
-    "demo15:cli": "tsx src/ch15_a2a_cli.ts"
+    "demo15:cli": "tsx src/ch15_a2a_cli.ts",
+    "demo16": "tsx src/ch16_resource.ts"
   },
   "repository": {
     "type": "git",
